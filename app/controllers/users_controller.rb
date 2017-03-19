@@ -5,8 +5,12 @@ class UsersController < ApplicationController
 		@user = current_user
 	end
 	
-	def show
-    @user = User.find(params[:id])
-    @user_stocks = @user.stocks
-  end
+	def my_friends
+	
+	end
+	
+#	def show
+#    @user = User.find(params[:id])
+#    @user_stocks = @user.stocks
+#  end
 end
