@@ -24,21 +24,23 @@ class UserStocksController < ApplicationController
   # POST /user_stocks
   # POST /user_stocks.json
   def create
-    if params[:stock_id].present?
-      @user_stock = UserStock.new(stock_id: params[:stock_id], user: current_user)
-    else
-      stock = Stock.find_by_ticker(params[:stock_ticker])
-      if stock
-        @user_stock = UserStock.new(user: current_user, stock: stock)
-      else
-        stock = Stock.new_from_lookup(params[:stock_ticker])
-        if stock.save
-          @user_stock = UserStock.new(user: current_user, stock: stock)
-        else
-          @user_stock = nil
-          flash[:error] = "Stock is not available"
-        end
-      end
+		if current_user.can_add_stock?(params[:stock_ticker])
+			if params[:stock_id].present?
+				@user_stock = UserStock.new(stock_id: params[:stock_id], user: current_user)
+			else
+				stock = Stock.find_by_ticker(params[:stock_ticker])
+				if stock
+					@user_stock = UserStock.new(user: current_user, stock: stock)
+				else
+					stock = Stock.new_from_lookup(params[:stock_ticker])
+					if stock.save
+						@user_stock = UserStock.new(user: current_user, stock: stock)
+					else
+						@user_stock = nil
+						flash[:error] = "Stock is not available"
+					end
+				end
+			end
     end
     
 
@@ -71,6 +73,7 @@ class UserStocksController < ApplicationController
   # DELETE /user_stocks/1
   # DELETE /user_stocks/1.json
   def destroy
+		
     @user_stock.destroy
     respond_to do |format|
       format.html { redirect_to my_portfolio_path, notice: 'Stock was successfully removed from portfolio.' }
@@ -81,10 +84,9 @@ class UserStocksController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_user_stock
-      @user_stock = UserStock.find(params[:id])
+      @user_stock = UserStock.where(stock_id: params[:id], user_id: current_user.id).first
     end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
     def user_stock_params
       params.require(:user_stock).permit(:user_id, :stock_id)
     end

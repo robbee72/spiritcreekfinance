@@ -22,4 +22,4 @@ init_stock_lookup = function(){
 	}
 	$(document).ready(function() {
 		init_stock_lookup();
-	})
+	});
